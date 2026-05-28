@@ -1,12 +1,12 @@
 import { motion } from 'framer-motion'
-import { X, Heart } from 'lucide-react'
+import { X } from 'lucide-react'
 import { GiftAnimation } from './GiftAnimation'
 
 interface SurpriseModalProps {
   onClose: () => void
 }
 
-const DECORATIONS = ['💜', '💛', '💗', '⭐', '🌸', '💫']
+const HEARTS = ['💖', '💜', '💛', '💗', '🤍', '💝']
 
 export function SurpriseModal({ onClose }: SurpriseModalProps) {
   return (
@@ -22,6 +22,7 @@ export function SurpriseModal({ onClose }: SurpriseModalProps) {
     >
       <motion.div
         className="modal-card"
+        style={{ maxWidth: 400 }}
         initial={{ scale: 0.6, opacity: 0, y: 40 }}
         animate={{ scale: 1, opacity: 1, y: 0 }}
         exit={{ scale: 0.6, opacity: 0, y: 40 }}
@@ -31,65 +32,80 @@ export function SurpriseModal({ onClose }: SurpriseModalProps) {
           <X size={16} />
         </button>
 
-        {/* Floating decorations */}
-        <div style={{ display: 'flex', justifyContent: 'center', gap: 10, marginBottom: 16, flexWrap: 'wrap' }}>
-          {DECORATIONS.map((d, i) => (
-            <motion.span
-              key={i}
-              style={{ fontSize: '1.4rem' }}
-              animate={{ y: [0, -8, 0] }}
-              transition={{ duration: 2 + i * 0.3, repeat: Infinity, ease: 'easeInOut', delay: i * 0.2 }}
-            >
-              {d}
-            </motion.span>
-          ))}
-        </div>
-
         {/* Animated gift box */}
         <GiftAnimation />
 
+        {/* Title */}
         <motion.h2
           id="modal-title"
           className="title-font"
-          style={{ fontSize: 'clamp(1.6rem, 5vw, 2.4rem)', marginBottom: 12, marginTop: 8 }}
-          animate={{ scale: [1, 1.04, 1] }}
+          style={{ fontSize: 'clamp(1.8rem, 5vw, 2.6rem)', marginTop: 10, marginBottom: 18 }}
+          animate={{ scale: [1, 1.05, 1] }}
           transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
         >
-          🎁 Para Angela 💜
+          🎉 ¡Para Angela! 🎉
         </motion.h2>
 
-        <div className="dots-divider">
-          {[0,1,2,3,4].map(i => (
-            <div key={i} className="dot" style={{ background: ['#FF69B4','#FFD700','#9B59B6','#87CEEB','#FF6B6B'][i] }} />
-          ))}
+        {/* Orbiting hearts */}
+        <div style={{ position: 'relative', height: 80, marginBottom: 16 }}>
+          {HEARTS.map((h, i) => {
+            const angle = (i / HEARTS.length) * 360
+            const rad = (angle * Math.PI) / 180
+            const rx = 52, ry = 28
+            return (
+              <motion.span
+                key={i}
+                style={{
+                  position: 'absolute',
+                  top: '50%',
+                  left: '50%',
+                  fontSize: '1.5rem',
+                  marginLeft: -12,
+                  marginTop: -12,
+                }}
+                animate={{
+                  x: Math.cos(rad + (i * 0.5)) * rx,
+                  y: Math.sin(rad + (i * 0.5)) * ry,
+                  rotate: [0, 360],
+                }}
+                transition={{
+                  x: { duration: 4, repeat: Infinity, ease: 'linear', delay: i * 0.15 },
+                  y: { duration: 4, repeat: Infinity, ease: 'linear', delay: i * 0.15 },
+                  rotate: { duration: 3 + i * 0.2, repeat: Infinity, ease: 'linear' },
+                }}
+              >
+                {h}
+              </motion.span>
+            )
+          })}
+
+          {/* Center sparkle */}
+          <motion.span
+            style={{
+              position: 'absolute', top: '50%', left: '50%',
+              transform: 'translate(-50%, -50%)',
+              fontSize: '2rem',
+            }}
+            animate={{ scale: [1, 1.3, 1], rotate: [0, 20, -20, 0] }}
+            transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
+          >
+            ✨
+          </motion.span>
         </div>
 
-        <p className="body-text" style={{ fontSize: '1rem', marginBottom: 20 }}>
-          Espero que <strong style={{ color: '#FFD700' }}>Dios</strong> te siga dando más años de vida
-          y que todas las <strong style={{ color: '#E8B4FF' }}>metas</strong> que te has propuesto
-          las puedas cumplir con su ayuda. 🙏
-        </p>
-
-        <p className="body-text" style={{ fontSize: '0.95rem', marginBottom: 12 }}>
-          Y nada... <strong style={{ color: '#FF69B4' }}>¡Feliz Cumpleaños nuevamente!</strong> 🎉
-        </p>
-
-        <p
-          className="body-text"
-          style={{ fontSize: '0.9rem', opacity: 0.8, fontStyle: 'italic', marginBottom: 24 }}
+        {/* Short unique sign-off */}
+        <motion.p
+          style={{
+            color: 'rgba(255,255,255,0.9)',
+            fontStyle: 'italic',
+            fontSize: '1rem',
+            letterSpacing: '0.03em',
+          }}
+          animate={{ opacity: [0.7, 1, 0.7] }}
+          transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
         >
-          ¡Disfrute su día que es una vez al año! 😄🎂
-        </p>
-
-        <motion.div
-          style={{ display: 'flex', justifyContent: 'center', gap: 12 }}
-          animate={{ scale: [1, 1.06, 1] }}
-          transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-        >
-          {[0, 1, 2].map(i => (
-            <Heart key={i} size={22} fill="#FF69B4" color="#FF69B4" style={{ filter: 'drop-shadow(0 0 6px #FF69B4)' }} />
-          ))}
-        </motion.div>
+          con mucho cariño 💖
+        </motion.p>
       </motion.div>
     </motion.div>
   )
