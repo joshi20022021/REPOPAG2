@@ -1,7 +1,6 @@
-import { useState, useRef, useCallback } from 'react'
+import { useState, useRef, useCallback, useEffect } from 'react'
 import { motion } from 'framer-motion'
 
-// Happy Birthday melody: [frequency Hz, duration seconds]
 const MELODY: [number, number][] = [
   [261.63, 0.35], [261.63, 0.15], [293.66, 0.5], [261.63, 0.5],
   [349.23, 0.5], [329.63, 1.0],
@@ -17,6 +16,7 @@ export function MusicPlayer() {
   const [isPlaying, setIsPlaying] = useState(false)
   const ctxRef = useRef<AudioContext | null>(null)
   const stopRef = useRef(false)
+  const startedRef = useRef(false)
 
   const playMelody = useCallback((ctx: AudioContext) => {
     stopRef.current = false
@@ -38,24 +38,43 @@ export function MusicPlayer() {
       t += dur
     })
 
-    // Loop
     const loopDelay = (t - ctx.currentTime + 0.5) * 1000
-    const timer = setTimeout(() => {
+    setTimeout(() => {
       if (!stopRef.current) playMelody(ctx)
     }, loopDelay)
-
-    return timer
   }, [])
+
+  // Auto-start on first user interaction
+  useEffect(() => {
+    const startAudio = () => {
+      if (startedRef.current) return
+      startedRef.current = true
+      const ctx = new AudioContext()
+      ctxRef.current = ctx
+      playMelody(ctx)
+      setIsPlaying(true)
+      document.removeEventListener('click', startAudio)
+      document.removeEventListener('keydown', startAudio)
+    }
+    document.addEventListener('click', startAudio)
+    document.addEventListener('keydown', startAudio)
+    return () => {
+      document.removeEventListener('click', startAudio)
+      document.removeEventListener('keydown', startAudio)
+    }
+  }, [playMelody])
 
   const toggle = () => {
     if (isPlaying) {
       stopRef.current = true
       ctxRef.current?.close()
       ctxRef.current = null
+      startedRef.current = false
       setIsPlaying(false)
     } else {
       const ctx = new AudioContext()
       ctxRef.current = ctx
+      startedRef.current = true
       playMelody(ctx)
       setIsPlaying(true)
     }
@@ -66,7 +85,7 @@ export function MusicPlayer() {
       className="btn-music"
       onClick={toggle}
       aria-label={isPlaying ? 'Silenciar música' : 'Reproducir música'}
-      title={isPlaying ? 'Silenciar música' : '🎵 Reproducir Cumpleaños Feliz'}
+      title={isPlaying ? 'Silenciar música' : 'Reproducir Cumpleaños Feliz'}
       whileTap={{ scale: 0.88 }}
     >
       <motion.span
